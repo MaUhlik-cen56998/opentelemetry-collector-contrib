@@ -8,7 +8,7 @@ import (
 	"bytes"
 	"io"
 	"log"
-	"net/url"
+	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -21,10 +21,10 @@ func TestReqToLog(t *testing.T) {
 	defaultConfig := createDefaultConfig().(*Config)
 
 	tests := []struct {
-		desc  string
-		sc    *bufio.Scanner
-		query url.Values
-		tt    func(t *testing.T, reqLog plog.Logs, reqLen int, settings receiver.Settings)
+		desc string
+		sc   *bufio.Scanner
+		r    *http.Request
+		tt   func(t *testing.T, reqLog plog.Logs, reqLen int, settings receiver.Settings)
 	}{
 		{
 			desc: "Valid query valid event",
@@ -32,12 +32,12 @@ func TestReqToLog(t *testing.T) {
 				reader := io.NopCloser(bytes.NewReader([]byte("this is a: log")))
 				return bufio.NewScanner(reader)
 			}(),
-			query: func() url.Values {
-				v, err := url.ParseQuery(`qparam1=hello&qparam2=world`)
+			r: func() *http.Request {
+				req, err := http.NewRequest("GET", "http://localhost:8080?param1=hello&param2=world", nil)
 				if err != nil {
-					log.Fatal("failed to parse query")
+					log.Fatal("failed to create request")
 				}
-				return v
+				return req
 			}(),
 			tt: func(t *testing.T, reqLog plog.Logs, reqLen int, _ receiver.Settings) {
 				require.Equal(t, 1, reqLen)
@@ -80,7 +80,7 @@ func TestReqToLog(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.desc, func(t *testing.T) {
-			reqLog, reqLen := reqToLog(test.sc, test.query, defaultConfig, receivertest.NewNopSettings())
+			reqLog, reqLen := reqToLog(test.sc, test.r, defaultConfig, receivertest.NewNopSettings())
 			test.tt(t, reqLog, reqLen, receivertest.NewNopSettings())
 		})
 	}
