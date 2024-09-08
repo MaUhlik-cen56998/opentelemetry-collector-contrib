@@ -48,15 +48,15 @@ func TestReqToLog(t *testing.T) {
 				scopeLogsScope := reqLog.ResourceLogs().At(0).ScopeLogs().At(0).Scope()
 				require.Equal(t, 2, scopeLogsScope.Attributes().Len())
 
-				if v, ok := attributes.Get("qparam1"); ok {
+				if v, ok := attributes.Get("query.param1"); ok {
 					require.Equal(t, "hello", v.AsString())
 				} else {
-					require.Fail(t, "faild to set attribute from query parameter 1")
+					require.Fail(t, "failed to set attribute from query parameter 1")
 				}
-				if v, ok := attributes.Get("qparam2"); ok {
+				if v, ok := attributes.Get("query.param2"); ok {
 					require.Equal(t, "world", v.AsString())
 				} else {
-					require.Fail(t, "faild to set attribute query parameter 2")
+					require.Fail(t, "failed to set attribute query parameter 2")
 				}
 			},
 		},
@@ -66,6 +66,13 @@ func TestReqToLog(t *testing.T) {
 				reader := io.NopCloser(bytes.NewReader([]byte("this is a: log")))
 				return bufio.NewScanner(reader)
 			}(),
+			r: func() *http.Request {
+				req, err := http.NewRequest("GET", "http://localhost:8080", nil)
+				if err != nil {
+					log.Fatal("failed to create request")
+				}
+				return req
+			}(),
 			tt: func(t *testing.T, reqLog plog.Logs, reqLen int, _ receiver.Settings) {
 				require.Equal(t, 1, reqLen)
 
@@ -74,6 +81,38 @@ func TestReqToLog(t *testing.T) {
 
 				scopeLogsScope := reqLog.ResourceLogs().At(0).ScopeLogs().At(0).Scope()
 				require.Equal(t, 2, scopeLogsScope.Attributes().Len())
+			},
+		},
+		{
+			desc: "Validate headers",
+			sc: func() *bufio.Scanner {
+				reader := io.NopCloser(bytes.NewReader([]byte("this is a: log")))
+				return bufio.NewScanner(reader)
+			}(),
+			r: func() *http.Request {
+				req, err := http.NewRequest("GET", "http://localhost:8080", nil)
+				if err != nil {
+					log.Fatal("failed to create request")
+				}
+				req.Header.Add("header1", "value1")
+				req.Header.Add("header2", "value2")
+				return req
+			}(),
+			tt: func(t *testing.T, reqLog plog.Logs, reqLen int, _ receiver.Settings) {
+
+				attributes := reqLog.ResourceLogs().At(0).Resource().Attributes()
+				require.Equal(t, 2, attributes.Len())
+
+				if v, ok := attributes.Get("header.Header1"); ok {
+					require.Equal(t, "value1", v.AsString())
+				} else {
+					require.Fail(t, "failed to set attribute from header 1")
+				}
+				if v, ok := attributes.Get("header.Header2"); ok {
+					require.Equal(t, "value2", v.AsString())
+				} else {
+					require.Fail(t, "failed to set attribute from header 2")
+				}
 			},
 		},
 	}
