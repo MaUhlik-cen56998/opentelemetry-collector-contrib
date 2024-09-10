@@ -22,7 +22,7 @@ import (
 	"go.opentelemetry.io/collector/receiver/receiverhelper"
 	"go.uber.org/zap"
 
-	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/webhookeventreceiver/internal/metadata"
+	"github.com/MaUhlik-cen56998/opentelemetry-collector-contrib/receiver/webhookeventreceiver/internal/metadata"
 )
 
 var (
