@@ -68,6 +68,7 @@ func converters[K any]() []ottl.Factory[K] {
 		NewMinuteFactory[K](),
 		NewMinutesFactory[K](),
 		NewMonthFactory[K](),
+		NewNanosecondFactory[K](),
 		NewNanosecondsFactory[K](),
 		NewNowFactory[K](),
 		NewParseCSVFactory[K](),
@@ -76,6 +77,7 @@ func converters[K any]() []ottl.Factory[K] {
 		NewParseSimplifiedXMLFactory[K](),
 		NewParseXMLFactory[K](),
 		NewRemoveXMLFactory[K](),
+		NewSecondFactory[K](),
 		NewSecondsFactory[K](),
 		NewSHA1Factory[K](),
 		NewSHA256Factory[K](),
@@ -87,6 +89,7 @@ func converters[K any]() []ottl.Factory[K] {
 		NewStringFactory[K](),
 		NewSubstringFactory[K](),
 		NewTimeFactory[K](),
+		NewTrimFactory[K](),
 		NewToKeyValueStringFactory[K](),
 		NewTruncateTimeFactory[K](),
 		NewTraceIDFactory[K](),
@@ -101,5 +104,6 @@ func converters[K any]() []ottl.Factory[K] {
 		NewAppendFactory[K](),
 		NewYearFactory[K](),
 		NewHexFactory[K](),
+		NewSliceToMapFactory[K](),
 	}
 }
